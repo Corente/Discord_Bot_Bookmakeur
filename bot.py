@@ -29,6 +29,7 @@ def get_total(tab):
     return res
 
 def find_richets():
+    global Banque
     argent_max = 0
     id_max = 0
     for i in Banque:
@@ -81,6 +82,7 @@ class Bet:
         return "Le bet à été ajouté"
     
     def fin(self, option_gagnante):
+        global Banque
         if (option_gagnante == 1):
             total_looser = get_total(self.bet2)
             total_gagant = get_total(self.bet1)
@@ -106,6 +108,7 @@ async def daily_money():
     await bot.wait_until_ready()
     while not bot.is_closed():
         mtn = datetime.strftime(datetime.now(),'%M')
+        global Banque
         if (mtn == '00'):
             for i in Banque:
                 i[1] = i[1] + 10 
@@ -129,6 +132,7 @@ async def durée_bets():
 @bot.command()
 async def inscription(ctx):
     """T'ajoute au systeme de bet avec 100$ si tu n'es pas dedant"""
+    global Banque
     if ctx.message.author.id not in Banque:
         Banque[ctx.message.author.id] =  100
         await ctx.send("Bienvenue Au casino")
@@ -138,6 +142,7 @@ async def inscription(ctx):
 @bot.command()
 async def mon_argent(ctx):
     """Donne ton argent perso"""
+    global Banque
     if ctx.message.author.id not in Banque:
         await ctx.send("Tu n'es pas inscrit au casino")
     else:
@@ -149,13 +154,21 @@ async def mon_argent(ctx):
 @bot.command()
 async def leaderboard(ctx):
     """Affiche les plus Blindaxxx"""
-    t = find_richets()
-    #user = await bot.fetch_user(t[0])
-    user = await ctx.guild.fetch_member(t[0])
-    name = user.name
-    global logo_argent
-    message = "WOWOWO @everyone regardez comment " + name + " est ultra BLINDAXXX, il a " + str(t[1]) + " " + logo_argent
-    await ctx.send(message)
+    global Banque
+    copie = Banque.copy()
+    tab = sorted(copie, key=copie.get, reverse=True)[:3]
+
+    embed=discord.Embed(title="Learderboard de la thunas", description="quiquicest qui a le plus d'argent", color=0x87f500)
+    embed.set_thumbnail(url="https://drive.google.com/file/d/1y1xUP9iNU1dtse_QONMBcVA89rHlLLHh/view?usp=sharing")
+    user = await ctx.guild.fetch_member(tab[0])
+    embed.add_field(name=user.name, value=Banque[tab[0]], inline=False)
+    if (len(tab) >= 2):
+        user = await ctx.guild.fetch_member(tab[0])
+        embed.add_field(name=user.name, value=Banque[tab[1]], inline=False)
+    if (len(tab) >= 3):
+        user = await ctx.guild.fetch_member(tab[0])
+        embed.add_field(name=user.name, value=Banque[tab[2]], inline=False)
+    await ctx.send(embed=embed)
 
 @bot.command()
 async def start_bet(ctx, sujet, option1, option2, durée):
@@ -173,6 +186,7 @@ async def bet_en_cours(ctx):
 async def parier(ctx, option, montant):
     """parie sur le bet en cours"""
     global current_bet
+    global Banque
     if (current_bet == None):
         await ctx.send("Il n'y a aucun bet en cours")
     elif (Banque[ctx.message.author.id] < montant):
