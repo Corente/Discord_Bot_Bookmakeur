@@ -17,7 +17,7 @@ Banque = {}
 #Le nom de la money default "$"
 logo_argent = "$"
 #Le lien pour acceder au code source
-github = "https://github.com/Corente"
+github = "https://github.com/Corente/Discord_Bot_Bookmakeur"
 #Le bet en cours
 current_bet = None
 
@@ -53,8 +53,8 @@ def show_bet():
 def end_bet_message(option_gagnante):
     global current_bet
     global logo_argent
-    total = get_total(current_bet.bet1) if (option_gagnante == 1) else get_total(current_bet.bet2)
-    res = "@everyone OYE OYE le bet est fini !!\n"
+    total = get_total(current_bet.bet2) if (option_gagnante == 1) else get_total(current_bet.bet1)
+    res = "@Beters OYE OYE le bet est fini !!\n"
     res += "Le gagnant est : " + (current_bet.sujet1 if (option_gagnante == 1) else current_bet.sujet2) + "\n"
     res += "Ceux qui ont gagné se repartissent " + str(total) + " " + logo_argent
     return res
@@ -70,15 +70,25 @@ class Bet:
         self.bet1 = {}
         self.bet2 = {}
 
-    def add_better(self, _id, montant, option):
-        if (_id == self.id_proposeur):
-            return "Vous avez proposez le pari, vous ne pouvez pas bet :'("
+    def parier(self, id_parieur, montant, option):
+        global Banque
+        if (id_parieur == self.id_proposeur):
+            return "Vous avez proposé le pari, vous ne pouvez pas bet :'("
         if (self.durée <= 0 ):
-            return "Les jeux sont faits, vous ne pouvez pas bet :'("
+            return "Les jeux sont faits, vous ne pouvez plus bet :'("
         if (option == 1):
-            self.bet1[_id] += montant
+            if (id_parieur in self.bet1):
+                tmp = self.bet1[id_parieur]
+            else:
+                tmp = 0
+            self.bet1[id_parieur] = tmp +  montant
         else:
-            self.bet2[_id] += montant
+            if (id_parieur in self.bet2):
+                tmp = self.bet2[id_parieur]
+            else:
+                tmp = 0
+            self.bet2[id_parieur] = tmp +  montant
+        Banque[id_parieur] -= montant
         return "Le bet à été ajouté"
     
     def fin(self, option_gagnante):
@@ -86,7 +96,7 @@ class Bet:
         if (option_gagnante == 1):
             total_looser = get_total(self.bet2)
             total_gagant = get_total(self.bet1)
-            for _id in _bet1:
+            for _id in self.bet1:
                 Banque[_id] +=  (self.bet1[_id] * total_looser) / total_gagant
         else:
             total_looser = get_total(self.bet1)
@@ -135,6 +145,8 @@ async def inscription(ctx):
     global Banque
     if ctx.message.author.id not in Banque:
         Banque[ctx.message.author.id] =  100
+        print(ctx.message.author.id)
+        print("#########################")
         await ctx.send("Bienvenue Au casino")
     else:
         await ctx.send("Tu es deja au casino")
@@ -157,25 +169,30 @@ async def leaderboard(ctx):
     global Banque
     copie = Banque.copy()
     tab = sorted(copie, key=copie.get, reverse=True)[:3]
+    print(tab)
+    print("#########################")
 
     embed=discord.Embed(title="Learderboard de la thunas", description="quiquicest qui a le plus d'argent", color=0x87f500)
     embed.set_thumbnail(url="https://drive.google.com/file/d/1y1xUP9iNU1dtse_QONMBcVA89rHlLLHh/view?usp=sharing")
     user = await ctx.guild.fetch_member(tab[0])
     embed.add_field(name=user.name, value=Banque[tab[0]], inline=False)
     if (len(tab) >= 2):
-        user = await ctx.guild.fetch_member(tab[0])
+        user = await ctx.guild.fetch_member(tab[1])
         embed.add_field(name=user.name, value=Banque[tab[1]], inline=False)
     if (len(tab) >= 3):
-        user = await ctx.guild.fetch_member(tab[0])
+        user = await ctx.guild.fetch_member(tab[2])
         embed.add_field(name=user.name, value=Banque[tab[2]], inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
-async def start_bet(ctx, sujet, option1, option2, durée):
+async def start_bet(ctx, sujet="", option1="", option2="", durée=""):
     """Commence un bet avec sujet option1, option, durée (en minute)"""
     global current_bet
-    current_bet = Bet(ctx.message.author.id, sujet, option1, option2, int(durée))
-    await ctx.send("Le bet a été créer")
+    if (sujet == "" or option1 == "" or option2 == "" or durée == ""):
+        await ctx.send("Il manque des arguments")
+    else:
+        current_bet = Bet(ctx.message.author.id, sujet, option1, option2, int(durée))
+        await ctx.send("Le bet a été créer")
 
 @bot.command()
 async def bet_en_cours(ctx):
@@ -183,23 +200,36 @@ async def bet_en_cours(ctx):
     await ctx.send(show_bet()) 
 
 @bot.command()
-async def parier(ctx, option, montant):
+async def parier(ctx, option="", montant=""):
     """parie sur le bet en cours"""
     global current_bet
     global Banque
+    if (option == "" or montant == ""):
+        await ctx.send("Il manque des arguments")
+        return
+    m = int(montant)
+    o = int(option)
     if (current_bet == None):
         await ctx.send("Il n'y a aucun bet en cours")
-    elif (Banque[ctx.message.author.id] < montant):
+    elif ctx.message.author.id not in Banque:
+        await ctx.send("Tu n'es pas inscrit au casino")
+    elif (Banque[ctx.message.author.id] < m):
         await ctx.send("Tu n'as pas assez d'argent sale pauvre")
-    elif (option_gagnante != 1 or option_gagnante != 2):
+    elif (o != 1 and o != 2):
         await ctx.send("Ce n'est pas une option valide")
     else:
-        current_bet.parier(ctx.message.author.id , montant, option)
+        message = current_bet.parier(ctx.message.author.id , m, o)
+        await ctx.send(message)
 
-@bot.command()
-async def stop_bet(ctx, option_gagnante):
+
+@bot.command() 
+async def stop_bet(ctx, option_gagnante = -1):
     """Arrete le bet en cours"""
     global current_bet
+    if (option_gagnante == -1):
+        await ctx.send("Il manque des arguments")
+        return
+    
     numero = int(option_gagnante)
     if (current_bet == None):
         await ctx.send("Il n'y a aucun bet en cours")
@@ -214,10 +244,12 @@ async def stop_bet(ctx, option_gagnante):
             await ctx.send(message)
 
 @bot.command()
-async def change_money(ctx, signe):
+async def change_money(ctx, signe=""):
     """Change le signe de l'argent"""
     global logo_argent
-    if (ctx.message.author.guild_permissions.administrator):
+    if (signe == ""):
+        await ctx.send("Il manque des arguments")
+    elif (ctx.message.author.guild_permissions.administrator):
         logo_argent = signe
         await ctx.send("Le signe à été changé")
     else:
