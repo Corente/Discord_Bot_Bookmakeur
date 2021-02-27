@@ -1,4 +1,4 @@
-import discord, os, asyncio, schedule, json
+import discord, os, asyncio, schedule, pickle
 from datetime import date, time, datetime
 from discord.ext import commands
 
@@ -21,7 +21,7 @@ github = "https://github.com/Corente/Discord_Bot_Bookmakeur"
 #Le bet en cours
 current_bet = None
 #Le fichier de sauvegarde
-save_file = "sauvegarde.json"
+save_file = "sauvegarde.pkl"
 
 
 def get_total(tab):
@@ -114,8 +114,8 @@ async def on_ready():
     print('------')
     if (os.path.exists(save_file)):
         global Banque
-        f = open(save_file, "r")
-        Banque = json.load(f)
+        f = open(save_file, "rb")
+        Banque = pickle.load(f)
         f.close()
     
 #Fonction qui ajoute tous les jours de l'argents aux users inscrits
@@ -149,9 +149,9 @@ async def sauvegarde():
     while not bot.is_closed():
         global Banque
         now = datetime.strftime(datetime.now(),'%H:%M')
-        if (now == '23:42' or now == '11:42'):
-            file = open(save_file, "w") 
-            json.dump(Banque, file)
+        if (now == '23:42' or now == '11:42' or now == '18:42'):
+            file = open(save_file, "wb") 
+            pickle.dump(Banque, file, pickle.HIGHEST_PROTOCOL)
             file.close() 
             t = 60
         else:
