@@ -123,9 +123,9 @@ async def daily_money():
     await bot.wait_until_ready()
     while not bot.is_closed():
         global Banque
-        if (datetime.now().time().minute == '00'):
+        if (datetime.now().time().minute == 0):
             for i in Banque:
-                Banque[i] += 10 
+                Banque[i] += 50
             t = 45
         else:
             t = 1
@@ -184,19 +184,24 @@ async def mon_argent(ctx):
 async def leaderboard(ctx):
     """Affiche les plus Blindaxxx"""
     global Banque
+    global logo_argent
     copie = Banque.copy()
     tab = sorted(copie, key=copie.get, reverse=True)[:3]
 
     embed=discord.Embed(title="Learderboard de la thunas", description="quiquicest qui a le plus d'argent", color=0x87f500)
     embed.set_thumbnail(url="https://i.kym-cdn.com/photos/images/newsfeed/001/499/826/2f0.png")
-    user = await ctx.guild.fetch_member(tab[0])
-    embed.add_field(name=user.name, value=Banque[tab[0]], inline=False)
+    if (len(tab) >= 1):
+        user = await ctx.guild.fetch_member(tab[0])
+        money = str(Banque[tab[0]]) + logo_argent
+        embed.add_field(name=user.name, value=money, inline=False)
     if (len(tab) >= 2):
         user = await ctx.guild.fetch_member(tab[1])
-        embed.add_field(name=user.name, value=Banque[tab[1]], inline=False)
+        money = str(Banque[tab[1]]) + logo_argent
+        embed.add_field(name=user.name, value=money, inline=False)
     if (len(tab) >= 3):
         user = await ctx.guild.fetch_member(tab[2])
-        embed.add_field(name=user.name, value=Banque[tab[2]], inline=False)
+        money = str(Banque[tab[2]]) + logo_argent
+        embed.add_field(name=user.name, value=money, inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
@@ -249,14 +254,14 @@ async def stop_bet(ctx, option_gagnante = -1):
     if (current_bet == None):
         await ctx.send("Il n'y a aucun bet en cours")
     elif (numero != 1 and numero != 2):
-        await ctx.send("Ce n'est pas une option valide")
-    elif (ctx.message.author.id != current_bet.id_proposeur):
-        await ctx.send("Vous n'avez pas créer le pari vous ne pouvez pas le finir")
-    else:
+        await ctx.send("Ce n'est pas une option valide")    
+    elif(ctx.message.author.id == current_bet.id_proposeur or (current_bet.durée < 1 and ctx.message.author.guild_permissions.administrator)):
             current_bet.fin(numero)
             message = end_bet_message(numero)
             current_bet = None
             await ctx.send(message)
+    else:
+        await ctx.send("Vous n'avez pas créer le pari vous ne pouvez pas le finir")
 
 @bot.command()
 async def change_money(ctx, signe=""):
