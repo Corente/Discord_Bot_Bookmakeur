@@ -26,8 +26,8 @@ def end_bet_message(option_gagnante, serveur_bet, serveur_money):
 
 def apply_gain(Banque, list_of_winners, id_serveur):
     for t in list_of_winners:
-        t[0] = id_winner
-        t[1] = gains
+        id_winner = t[0]
+        gains = t[1]
         Banque[id_winner] += gains
 
 def save(path, Banque):
