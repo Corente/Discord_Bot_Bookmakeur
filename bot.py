@@ -30,16 +30,6 @@ def get_total(tab):
         res += tab[key]
     return res
 
-def find_richets():
-    global Banque
-    argent_max = 0
-    id_max = 0
-    for i in Banque:
-        if (Banque[i] > argent_max):
-            argent_max = Banque[i]
-            id_max = i
-    return (id_max, argent_max)
-
 def show_bet():
     res = ""
     global current_bet
@@ -122,7 +112,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    if (path.exists(save_file)):
+    if (os.path.exists(save_file)):
         global Banque
         f = open(save_file, "r")
         Banque = json.load(f)
@@ -174,8 +164,6 @@ async def inscription(ctx):
     global Banque
     if ctx.message.author.id not in Banque:
         Banque[ctx.message.author.id] =  100
-        print(ctx.message.author.id)
-        print("#########################")
         await ctx.send("Bienvenue Au casino")
     else:
         await ctx.send("Tu es deja au casino")
@@ -198,11 +186,9 @@ async def leaderboard(ctx):
     global Banque
     copie = Banque.copy()
     tab = sorted(copie, key=copie.get, reverse=True)[:3]
-    print(tab)
-    print("#########################")
 
     embed=discord.Embed(title="Learderboard de la thunas", description="quiquicest qui a le plus d'argent", color=0x87f500)
-    embed.set_thumbnail(url="https://drive.google.com/file/d/1y1xUP9iNU1dtse_QONMBcVA89rHlLLHh/view?usp=sharing")
+    embed.set_thumbnail(url="https://i.kym-cdn.com/photos/images/newsfeed/001/499/826/2f0.png")
     user = await ctx.guild.fetch_member(tab[0])
     embed.add_field(name=user.name, value=Banque[tab[0]], inline=False)
     if (len(tab) >= 2):
