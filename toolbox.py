@@ -24,10 +24,10 @@ def end_bet_message(option_gagnante, serveur_bet, serveur_money):
     res += "Ceux qui ont gagné se repartissent " + str(total) + " " + serveur_money
     return res
 
-def apply_gain(Banque, list_of_winners):
-    for tuples in list_of_winners:
-        tuples[0] = id_winner
-        tuples[1] = gains
+def apply_gain(Banque, list_of_winners, id_serveur):
+    for t in list_of_winners:
+        t[0] = id_winner
+        t[1] = gains
         Banque[id_winner] += gains
 
 def save(path, Banque):

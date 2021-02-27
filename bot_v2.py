@@ -191,7 +191,7 @@ async def stop_bet(ctx, option_gagnante = -1):
     elif(ctx.message.author.id == current_bet[ctx.message.author.guild.id].id_proposeur or (current_bet[ctx.message.author.guild.id].durée < 1 and ctx.message.author.guild_permissions.administrator)):
             winners = current_bet[ctx.message.author.guild.id].fin(numero)
             serveur_bet = current_bet[ctx.message.author.guild.id]
-            apply_gain(Banque[ctx.message.author.guild.id], winners)
+            apply_gain(Banque[ctx.message.author.guild.id], winners, serveur_bet)
             message = end_bet_message(numero, serveur_bet, logo_argent)
             del current_bet[ctx.message.author.guild.id]
             await ctx.send(message)

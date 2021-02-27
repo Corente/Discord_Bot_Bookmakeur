@@ -27,7 +27,7 @@ class Bet:
             else:
                 tmp = 0
             self.bet2[id_parieur] = tmp +  montant
-            Banque[id_parieur] -= montant
+        Banque[id_parieur] -= montant
         return "Le bet à été ajouté"
     
     def fin(self, option_gagnante):
