@@ -123,9 +123,9 @@ async def daily_money():
     await bot.wait_until_ready()
     while not bot.is_closed():
         global Banque
-        if (datetime.now().time().minute == 0):
+        if (datetime.now().time().minute % 10 == 0):
             for i in Banque:
-                Banque[i] += 50
+                Banque[i] += 5
             t = 45
         else:
             t = 1
@@ -210,6 +210,8 @@ async def start_bet(ctx, sujet="", option1="", option2="", durée=""):
     global current_bet
     if (sujet == "" or option1 == "" or option2 == "" or durée == ""):
         await ctx.send("Il manque des arguments")
+    elif (current_bet != None):
+        await ctx.send("Un bet est deja en cours !")
     else:
         current_bet = Bet(ctx.message.author.id, sujet, option1, option2, int(durée))
         await ctx.send("Le bet a été créer")
