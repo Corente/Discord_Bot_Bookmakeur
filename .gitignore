@@ -1,3 +1,4 @@
 token.txt
 test.py
-sauvegarde.pkl
+sauvegardes/
+__pycache__/
