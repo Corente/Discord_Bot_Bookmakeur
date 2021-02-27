@@ -1,4 +1,4 @@
-import discord, os, asyncio, schedule
+import discord, os, asyncio, schedule, json
 from datetime import date, time, datetime
 from discord.ext import commands
 
@@ -96,13 +96,21 @@ class Bet:
         if (option_gagnante == 1):
             total_looser = get_total(self.bet2)
             total_gagant = get_total(self.bet1)
-            for _id in self.bet1:
-                Banque[_id] +=  (self.bet1[_id] * total_looser) / total_gagant
+            if (total_looser == 0):
+                for _id in self.bet1:
+                    Banque[_id] += self.bet1[_id]
+            else:
+                for _id in self.bet1:
+                    Banque[_id] +=  (self.bet1[_id] * total_looser) / total_gagant
         else:
             total_looser = get_total(self.bet1)
             total_gagant = get_total(self.bet2)
-            for _id in self.bet2:
-                Banque[_id] +=  (self.bet2[_id] * total_looser) / total_gagant
+            if (total_looser == 0):
+                for _id in self.bet2:
+                    Banque[_id] += self.bet2[_id]
+            else:
+                for _id in self.bet2:
+                    Banque[_id] +=  (self.bet2[_id] * total_looser) / total_gagant
 
 
 @bot.event
@@ -112,17 +120,21 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+    if (path.exists("sauvergarde.json")):
+        global Banque
+        f = open("sauvegarde.json", "r")
+        Banque = json.load(f)
+        f.close()
     
 #Fonction qui ajoute tous les jours de l'argents aux users inscrits
 async def daily_money():
     await bot.wait_until_ready()
     while not bot.is_closed():
-        mtn = datetime.strftime(datetime.now(),'%M')
         global Banque
-        if (mtn == '00'):
+        if (datetime.now().time().minute == '00'):
             for i in Banque:
-                i[1] = i[1] + 10 
-            t = 90
+                Banque[i] += 10 
+            t = 45
         else:
             t = 1
         await asyncio.sleep(t)
@@ -134,6 +146,20 @@ async def durée_bets():
         global current_bet
         if (current_bet != None and current_bet.durée > 0):
             current_bet.durée -= 1
+            t = 60
+        else:
+            t = 1
+        await asyncio.sleep(t)
+
+#Fonction qui sauvegarde la banque dans un fichier
+async def sauvegarde():
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        global Banque
+        if (datetime.strftime(datetime.now(),'%H:%M') == '23:42'):
+            file = open("sauvegarde.json", "w") 
+            json.dump(Banque, file)
+            file.close() 
             t = 60
         else:
             t = 1
@@ -263,4 +289,5 @@ async def credits(ctx):
 
 bot.loop.create_task(daily_money())
 bot.loop.create_task(durée_bets())
+bot.loop.create_task(sauvegarde())
 bot.run(TOKEN)
