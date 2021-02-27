@@ -20,6 +20,8 @@ logo_argent = "$"
 github = "https://github.com/Corente/Discord_Bot_Bookmakeur"
 #Le bet en cours
 current_bet = None
+#Le fichier de sauvegarde
+save_file = "sauvegarde.json"
 
 
 def get_total(tab):
@@ -120,9 +122,9 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
-    if (path.exists("sauvergarde.json")):
+    if (path.exists(save_file)):
         global Banque
-        f = open("sauvegarde.json", "r")
+        f = open(save_file, "r")
         Banque = json.load(f)
         f.close()
     
@@ -156,8 +158,9 @@ async def sauvegarde():
     await bot.wait_until_ready()
     while not bot.is_closed():
         global Banque
-        if (datetime.strftime(datetime.now(),'%H:%M') == '23:42'):
-            file = open("sauvegarde.json", "w") 
+        now = datetime.strftime(datetime.now(),'%H:%M')
+        if (now == '23:42' or now == '11:42'):
+            file = open(save_file, "w") 
             json.dump(Banque, file)
             file.close() 
             t = 60
