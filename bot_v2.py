@@ -215,6 +215,10 @@ async def credits(ctx):
     """Lien du code source"""
     await ctx.send(github)
 
+@bot.command(hidden=True)
+async def save(ctx):
+    global Banque
+    save(path, Banque)
 
 bot.loop.create_task(daily_money())
 bot.loop.create_task(durée_bets())
