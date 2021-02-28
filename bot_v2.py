@@ -1,5 +1,5 @@
 import discord, os, asyncio, schedule
-from toolbox import get_total, show_bet, end_bet_message, apply_gain, load, save
+from toolbox import get_total, show_bet, end_bet_message, apply_gain, load, save_in_file
 from bet import Bet
 from datetime import date, time, datetime
 from discord.ext import commands
@@ -68,8 +68,8 @@ async def sauvegarde():
     while not bot.is_closed():
         global Banque
         now = datetime.strftime(datetime.now(),'%H:%M')
-        if (now == '23:42' or now == '11:42' or now == '18:42'):
-            save(path, Banque)
+        if (now == '23:42' or now == '11:42' or now == '21:23'):
+            save_in_file(path, Banque)
             t = 60
         else:
             t = 1
@@ -209,7 +209,7 @@ async def change_money(ctx, signe=""):
         await ctx.send("Le signe à été changé")
     else:
         await ctx.send("Demande à un adulte pour cela")
-    
+
 @bot.command()
 async def credits(ctx):
     """Lien du code source"""
@@ -218,7 +218,7 @@ async def credits(ctx):
 @bot.command(hidden=True)
 async def save(ctx):
     global Banque
-    save(path, Banque)
+    save_in_file(path, Banque)
 
 bot.loop.create_task(daily_money())
 bot.loop.create_task(durée_bets())

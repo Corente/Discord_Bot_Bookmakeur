@@ -30,7 +30,7 @@ def apply_gain(Banque, list_of_winners, id_serveur):
         gains = t[1]
         Banque[id_winner] += gains
 
-def save(path, Banque):
+def save_in_file(path, Banque):
     for key in Banque:
         filename = os.path.join(path, (str(key) + ".pkl"))
         file = open(filename, "wb")
