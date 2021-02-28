@@ -15,6 +15,8 @@ class Bet:
             return "Vous avez proposé le pari, vous ne pouvez pas bet :'("
         if (self.durée <= 0 ):
             return "Les jeux sont faits, vous ne pouvez plus bet :'("
+        if ((id_parieur in self.bet1 and option == 2) or (id_parieur in self.bet2 and option == 1)):
+            return "Vous ne pouvez pas re-choisir une option apres avoir parié"
         if (option == 1):
             if (id_parieur in self.bet1):
                 tmp = self.bet1[id_parieur]
@@ -40,7 +42,8 @@ class Bet:
                     ret.append((_id, self.bet1[_id]))
             else:
                 for _id in self.bet1:
-                    gain = (self.bet1[_id] * total_looser) / total_gagant
+                    gain = (self.bet1[_id] * total_looser) // total_gagant
+                    gain += self.bet1[_id]
                     ret.append((_id, gain))
         else:
             total_looser = get_total(self.bet1)
@@ -50,6 +53,7 @@ class Bet:
                     ret.append((_id, self.bet2[_id]))
             else:
                 for _id in self.bet2:
-                    gain = (self.bet2[_id] * total_looser) / total_gagant
+                    gain = (self.bet2[_id] * total_looser) // total_gagant
+                    gain += self.bet1[_id]
                     ret.append((_id, gain))
         return ret
